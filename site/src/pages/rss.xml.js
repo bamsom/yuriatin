@@ -9,7 +9,7 @@ export async function GET(context) {
   );
 
   return rss({
-    title: 'Yuriatin — A Weekly Ballet Column',
+    title: 'R. A. Pi — A Weekly Ballet Column',
     description: 'Dispatches from the ballet of a city that isn’t there.',
     site: context.site,
     items: reviews.map((r) => ({
