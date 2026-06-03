@@ -1,0 +1,47 @@
+name: check
+
+# Runs on every PR: a bad canon mutation (or malformed exported Markdown) fails
+# the build before it can reach main.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  canon-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install backend deps
+        run: pip install -r backend/requirements.txt
+
+      - name: Build a fresh canon DB from migrations + seed
+        working-directory: backend
+        run: python -m engine init
+
+      - name: Canon integrity check (exits non-zero on failure)
+        working-directory: backend
+        run: python -m engine check
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install site deps
+        working-directory: site
+        run: npm ci
+
+      # Astro's zod schema validates every committed review's frontmatter, so a
+      # malformed export fails here too.
+      - name: Astro build (validates committed Markdown)
+        working-directory: site
+        run: npm run build

@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const reviews = await getCollection('reviews');
+  return reviews.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+function stars(rating: number): string {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half ? 1 : 0));
+}
+---
+
+<Base title={`${d.title} — Yuriatin`} description={`${d.company} · ${d.work} · ${d.week}`}>
+  <article class="review">
+    <h1>{d.title}</h1>
+    <p class="byline">
+      <span class={`verdict ${d.verdict}`}>{d.verdict}</span>
+      &nbsp;<span class="stars" title={`${d.rating} of 5`}>{stars(d.rating)}</span>
+      <br />
+      <strong>{d.company}</strong> · <em>{d.work}</em> · {d.week}
+      {d.dancers.length > 0 && <> · {d.dancers.join(', ')}</>}
+    </p>
+
+    {d.audioUrl && (
+      <p><audio controls src={d.audioUrl}>Your browser does not support audio.</audio></p>
+    )}
+
+    <Content />
+  </article>
+</Base>

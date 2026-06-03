@@ -1,0 +1,34 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const reviews = (await getCollection('reviews')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+function stars(rating: number): string {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half ? 1 : 0));
+}
+---
+
+<Base title="Yuriatin — the weekly column">
+  <p>
+    The complete archive of the column, newest first. It is a weekly thing — the
+    <a href={`${base}/rss.xml`}>RSS feed</a> is the proper way to follow it.
+  </p>
+  <ul class="review-list">
+    {reviews.map((r) => (
+      <li>
+        <h2><a href={`${base}/reviews/${r.id}/`}>{r.data.title}</a></h2>
+        <p class="meta">
+          <span class={`verdict ${r.data.verdict}`}>{r.data.verdict}</span>
+          &nbsp;<span class="stars">{stars(r.data.rating)}</span>
+          &nbsp;· {r.data.company} · <em>{r.data.work}</em> · {r.data.week}
+        </p>
+      </li>
+    ))}
+  </ul>
+</Base>

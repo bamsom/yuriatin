@@ -1,0 +1,33 @@
+# === Yuriatin .gitignore ===
+# Commit only SOURCE. Everything derived/regenerable is excluded.
+# See README.md "Committed vs. generated boundary" for the rationale.
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+backend/.venv/
+
+# --- SQLite canon store (DERIVED: rebuilt from migrations + seed + ticks) ---
+# The authoritative published record lives in the committed Markdown exports,
+# not in this binary. WAL/SHM are transient.
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.db-journal
+
+# --- Node / Astro ---
+node_modules/
+site/dist/
+.astro/
+site/.astro/
+
+# --- OS / editor junk ---
+.DS_Store
+*.log
+.env
+.env.*
