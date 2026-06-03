@@ -21,14 +21,22 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <link
       rel="alternate"
       type="application/rss+xml"
-      title="Yuriatin"
+      title="R. A. Pi"
       href={`${base}/rss.xml`}
     />
   </head>
   <body>
     <div class="wrap">
       <header class="masthead">
-        <a href={`${base}/`}><h1>Yuriatin</h1></a>
+        <a href={`${base}/`} class="site-brand">
+          <img
+            src={`${base}/img/logo.jpg`}
+            alt="R. A. Pi"
+            width="40"
+            height="40"
+          />
+          <span class="site-title">R. A. Pi</span>
+        </a>
         <p class="tagline">A weekly notice from the ballet of a city that isn't there.</p>
       </header>
       <main>
@@ -36,10 +44,33 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </main>
       <footer>
         <p>
-          Yuriatin · canon-driven static column ·
+          R. A. Pi · canon-driven static column ·
           <a href={`${base}/rss.xml`}>RSS</a>
         </p>
       </footer>
     </div>
+
+    <style>
+      /* Masthead brand: logo on the left, title inline + vertically centered. */
+      .site-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+      }
+      .site-brand img {
+        display: block;
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+      .site-title {
+        font-size: 2.4rem;
+        letter-spacing: 0.02em;
+        font-weight: bold;
+        line-height: 1;
+      }
+    </style>
   </body>
 </html>
