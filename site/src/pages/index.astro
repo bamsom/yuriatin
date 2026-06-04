@@ -24,9 +24,18 @@ function stars(rating: number): string {
       <li>
         <h2><a href={`${base}/reviews/${r.id}/`}>{r.data.title}</a></h2>
         <p class="meta">
-          <span class={`verdict ${r.data.verdict}`}>{r.data.verdict}</span>
-          &nbsp;<span class="stars">{stars(r.data.rating)}</span>
-          &nbsp;· {r.data.company} · <em>{r.data.work}</em> · {r.data.week}
+          {r.data.kind === 'dispatch' ? (
+            <>
+              <span class="verdict dispatch">dispatch</span>
+              &nbsp;· {r.data.company}{r.data.dateline && <> · {r.data.dateline}</>} · {r.data.week}
+            </>
+          ) : (
+            <>
+              <span class={`verdict ${r.data.verdict}`}>{r.data.verdict}</span>
+              &nbsp;<span class="stars">{stars(r.data.rating)}</span>
+              &nbsp;· {r.data.company} · <em>{r.data.work}</em> · {r.data.week}
+            </>
+          )}
         </p>
       </li>
     ))}

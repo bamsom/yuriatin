@@ -21,15 +21,31 @@ function stars(rating: number): string {
 }
 ---
 
-<Base title={`${d.title} — R. A. Pi`} description={`${d.company} · ${d.work} · ${d.week}`}>
+<Base
+  title={`${d.title} — R. A. Pi`}
+  description={d.kind === 'dispatch'
+    ? `${d.company}${d.dateline ? ` · ${d.dateline}` : ''} · ${d.week}`
+    : `${d.company} · ${d.work} · ${d.week}`}
+>
   <article class="review">
     <h1>{d.title}</h1>
     <p class="byline">
-      <span class={`verdict ${d.verdict}`}>{d.verdict}</span>
-      &nbsp;<span class="stars" title={`${d.rating} of 5`}>{stars(d.rating)}</span>
-      <br />
-      <strong>{d.company}</strong> · <em>{d.work}</em> · {d.week}
-      {d.dancers.length > 0 && <> · {d.dancers.join(', ')}</>}
+      {d.kind === 'dispatch' ? (
+        <>
+          <span class="verdict dispatch">dispatch</span>
+          {d.column && <> · {d.column}</>}
+          <br />
+          <strong>{d.company}</strong>{d.dateline && <> · {d.dateline}</>} · {d.week}
+        </>
+      ) : (
+        <>
+          <span class={`verdict ${d.verdict}`}>{d.verdict}</span>
+          &nbsp;<span class="stars" title={`${d.rating} of 5`}>{stars(d.rating)}</span>
+          <br />
+          <strong>{d.company}</strong> · <em>{d.work}</em> · {d.week}
+          {d.dancers.length > 0 && <> · {d.dancers.join(', ')}</>}
+        </>
+      )}
     </p>
 
     {d.audioUrl && (
