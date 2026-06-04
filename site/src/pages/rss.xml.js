@@ -15,7 +15,10 @@ export async function GET(context) {
     items: reviews.map((r) => ({
       title: r.data.title,
       pubDate: r.data.pubDate,
-      description: `${r.data.verdict.toUpperCase()} (${r.data.rating}★) — ${r.data.company}, ${r.data.work}`,
+      description:
+        r.data.kind === 'dispatch'
+          ? `DISPATCH — ${r.data.company}${r.data.dateline ? `, ${r.data.dateline}` : ''}`
+          : `${r.data.verdict.toUpperCase()} (${r.data.rating}★) — ${r.data.company}, ${r.data.work}`,
       link: `${base}/reviews/${r.id}/`,
     })),
     customData: '<language>en-us</language>',

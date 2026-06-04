@@ -38,6 +38,7 @@ a { color: var(--accent); }
 .verdict.rave, .verdict.admiring { color: #2f6b3a; }
 .verdict.mixed { color: var(--muted); }
 .verdict.cool, .verdict.pan { color: var(--accent); }
+.verdict.dispatch { color: var(--muted); font-style: italic; }
 
 .stars { letter-spacing: 0.1em; }
 
