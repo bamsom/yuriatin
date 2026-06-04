@@ -13,6 +13,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function stars(rating: number): string {
   const full = Math.floor(rating);
@@ -48,6 +49,16 @@ function stars(rating: number): string {
         </>
       )}
     </p>
+
+    {d.kind === 'dispatch' && (
+      <img
+        class="feature"
+        src={`${base}/img/logo.jpg`}
+        alt={`Illustration for ${d.title}`}
+        width="572"
+        height="630"
+      />
+    )}
 
     {d.audioUrl && (
       <p><audio controls src={d.audioUrl}>Your browser does not support audio.</audio></p>
