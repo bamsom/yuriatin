@@ -212,6 +212,37 @@ def review_new(
     conn.close()
 
 
+@review_app.command("delete")
+def review_delete(
+    slug: str = typer.Argument(..., help="Slug of the review to remove."),
+) -> None:
+    """Remove a published review (row + exported Markdown).
+
+    The review's own children cascade away (review_dancers, its forum thread and
+    that thread's posts). Shared canon — company, dancers, feuds — is left intact.
+    """
+    conn = _conn()
+    try:
+        row = canon.delete_review(conn, slug)
+    except canon.CanonError as e:
+        conn.rollback()
+        _fail(str(e))
+
+    md_path = export_mod.CONTENT_DIR / f"{slug}.md"
+    typer.secho(f"deleted review '{slug}' (id={row['id']})", fg=typer.colors.GREEN)
+    if STATE.dry_run:
+        typer.echo(f"  [dry-run] would also remove {md_path}")
+    else:
+        if md_path.exists():
+            md_path.unlink()
+            typer.echo(f"  removed {md_path}")
+        else:
+            typer.echo(f"  (no Markdown at {md_path} to remove)")
+
+    _finalize(conn)
+    conn.close()
+
+
 # --------------------------------------------------------------------------- #
 # rep
 # --------------------------------------------------------------------------- #

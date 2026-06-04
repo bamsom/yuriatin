@@ -193,6 +193,27 @@ def insert_review(
     return review_id
 
 
+def get_review_by_slug(conn: sqlite3.Connection, slug: str) -> sqlite3.Row:
+    row = conn.execute("SELECT * FROM reviews WHERE slug = ?", (slug,)).fetchone()
+    if row is None:
+        raise CanonError(f"no review with slug '{slug}'")
+    return row
+
+
+def delete_review(conn: sqlite3.Connection, slug: str) -> sqlite3.Row:
+    """Remove a published review and everything that belongs to it.
+
+    The review's own children cascade away via FK ``ON DELETE CASCADE``
+    (``review_dancers``, the ``forum_threads`` raised on it, and those threads'
+    ``forum_posts``). Shared canon — the company, its dancers, any feud — is left
+    untouched: a feud references companies/dancers, not the review, so removing
+    the article cannot dangle it. Returns the deleted review row (for reporting).
+    """
+    row = get_review_by_slug(conn, slug)  # raises CanonError if unknown
+    conn.execute("DELETE FROM reviews WHERE id = ?", (row["id"],))
+    return row
+
+
 # --------------------------------------------------------------------------- #
 # Tick ledger helpers (idempotency for the weekly batch).
 # --------------------------------------------------------------------------- #

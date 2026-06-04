@@ -26,6 +26,7 @@ function stars(rating: number): string {
   description={d.kind === 'dispatch'
     ? `${d.company}${d.dateline ? ` · ${d.dateline}` : ''} · ${d.week}`
     : `${d.company} · ${d.work} · ${d.week}`}
+  theme={d.kind === 'dispatch' ? 'constructivist' : undefined}
 >
   <article class="review">
     <h1>{d.title}</h1>
