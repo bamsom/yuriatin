@@ -1,7 +1,7 @@
 :root {
   --ink: #1a1714;
-  --paper: #f7f3ec;
-  --rule: #d8cfc0;
+  --paper: #efeeec;
+  --rule: #ddd9d2;
   --accent: #7a2f2f;
   --muted: #6b6258;
   --maxw: 44rem;
@@ -48,3 +48,43 @@ article.review hr { border: none; border-top: 1px solid var(--rule); margin: 2re
 
 footer { margin-top: 3rem; border-top: 1px solid var(--rule); padding-top: 1rem;
   color: var(--muted); font-size: 0.85rem; }
+
+/* --------------------------------------------------------------------------- *
+ * Constructivist (Rodchenko) theme — applied ONLY when <body data-theme=...>.
+ * Every rule is scoped under [data-theme="constructivist"] so it can never leak
+ * into the global chrome or the index/review pages. The Constructivism lives in
+ * the chrome (masthead, title, dispatch tag, dividers) — NOT the running essay.
+ * --------------------------------------------------------------------------- */
+[data-theme="constructivist"] {
+  --paper:#ece6d6;        /* aged poster cream, THIS page only */
+  --ink:#171513;
+  --con-red:#d72a1e;      /* vermilion from the reference cover */
+}
+[data-theme="constructivist"] .masthead {
+  border-bottom:6px solid var(--ink);
+  background:repeating-linear-gradient(90deg,
+    var(--con-red) 0 14px, var(--paper) 14px 28px);
+  padding:0.75rem 1rem;
+}
+[data-theme="constructivist"] article.review h1 {
+  font-family:'Oswald','Helvetica Neue',sans-serif;
+  text-transform:uppercase; font-weight:700; line-height:.9;
+  letter-spacing:.01em; color:var(--con-red);
+  font-size:clamp(2.4rem,7vw,4.5rem);
+}
+[data-theme="constructivist"] .verdict.dispatch {
+  background:var(--ink); color:var(--paper); font-style:normal;
+  font-family:'Oswald',sans-serif; text-transform:uppercase;
+  padding:.15em .55em; letter-spacing:.04em; border:none;
+}
+[data-theme="constructivist"] article.review hr {
+  border:none; height:10px; background:repeating-linear-gradient(45deg,
+    var(--ink) 0 12px, transparent 12px 26px); margin:2.5rem 0;
+}
+/* The tagline sits on the striped masthead; a solid ink band keeps it legible
+   over the red/cream stripes (a flat color alone would still clash). */
+[data-theme="constructivist"] .masthead .tagline {
+  display:inline-block; margin:0.5rem 0 0; padding:0.2em 0.6em;
+  background:var(--ink); color:var(--paper); font-style:normal;
+  font-family:'Oswald','Helvetica Neue',sans-serif; letter-spacing:.02em;
+}
