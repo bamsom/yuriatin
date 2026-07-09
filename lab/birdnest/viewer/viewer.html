@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>birdnest — episode viewer</title>
+<style>
+  :root {
+    --bg: #0b0e14; --panel: rgba(16, 20, 30, 0.82); --line: #232b3a;
+    --text: #c9d4e3; --dim: #6b7891; --accent: #9fd3ff;
+    --ok: #7fd8a4; --bad: #ff6b5e;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 13px/1.45 "SF Mono", ui-monospace, Menlo, monospace;
+  }
+  #scene { position: fixed; inset: 0; }
+
+  .panel {
+    position: fixed; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 12px; backdrop-filter: blur(6px);
+  }
+  #hud { top: 14px; left: 14px; min-width: 240px; }
+  #hud h1 { font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--accent); }
+  #hud .sub { color: var(--dim); margin: 2px 0 8px; font-size: 11px; }
+  #hud table { border-collapse: collapse; width: 100%; }
+  #hud td { padding: 1px 0; }
+  #hud td.v { text-align: right; font-variant-numeric: tabular-nums; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  #score-row td { border-top: 1px solid var(--line); padding-top: 4px; }
+  #failbanner {
+    display: none; margin-top: 8px; padding: 5px 8px; border-radius: 5px;
+    background: rgba(255, 80, 70, .14); border: 1px solid rgba(255, 80, 70, .5);
+    color: var(--bad); font-weight: 600;
+  }
+  #legend { bottom: 74px; left: 14px; color: var(--dim); font-size: 11px;
+            display: flex; align-items: center; gap: 8px; }
+  #legend .bar { width: 120px; height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, #4f8fe6, #e1e4eb, #ff5a50); }
+
+  #controls {
+    bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  }
+  button {
+    background: #141a26; color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 5px 11px; font: inherit; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  #step-slider { width: 320px; accent-color: var(--accent); }
+  #step-label { min-width: 84px; text-align: center; color: var(--dim); }
+
+  #loader { top: 14px; right: 14px; font-size: 11px; color: var(--dim);
+            display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  #loader input { display: none; }
+  #loader label { cursor: pointer; border: 1px dashed var(--line); border-radius: 6px;
+                  padding: 5px 10px; }
+  #loader label:hover { border-color: var(--accent); color: var(--accent); }
+  #file-name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* training-run browser (appears only when runs/train-* are served) */
+  #training { top: 96px; right: 14px; width: 236px; display: none; font-size: 11px; }
+  #training h2 { font-size: 11px; font-weight: 600; letter-spacing: .04em;
+                 color: var(--accent); margin-bottom: 6px; }
+  #run-select { width: 100%; background: #141a26; color: var(--text);
+                border: 1px solid var(--line); border-radius: 6px;
+                padding: 3px 6px; font: inherit; font-size: 11px; }
+  #gen-row { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
+  #gen-slider { flex: 1; accent-color: var(--accent); min-width: 0; }
+  #gen-label { color: var(--dim); min-width: 48px; text-align: right; }
+  #seed-row { display: none; align-items: center; gap: 6px; margin: 0 0 4px;
+              color: var(--dim); }
+  #seed-select { flex: 1; background: #141a26; color: var(--text);
+                 border: 1px solid var(--line); border-radius: 6px;
+                 font: inherit; font-size: 11px; padding: 2px 4px; }
+  #archive-grid { display: grid; gap: 2px; margin: 6px 0 4px; }
+  .acell { aspect-ratio: 1; border-radius: 2px; background: #141a26;
+           border: 1px solid transparent; }
+  .acell.clickable { cursor: pointer; border-color: rgba(159, 211, 255, .55); }
+  .acell.clickable:hover { border-color: #fff; }
+  .acell.active { border-color: #ffd479; box-shadow: 0 0 0 1px #ffd479; }
+  #axes { display: flex; justify-content: space-between; color: var(--dim);
+          font-size: 10px; margin-bottom: 4px; }
+  #train-info { color: var(--dim); font-size: 10.5px; line-height: 1.5; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="scene"></div>
+
+<div id="hud" class="panel">
+  <h1>birdnest</h1>
+  <div class="sub" id="meta-line">no episode loaded</div>
+  <table>
+    <tr><td>sticks</td>      <td class="v" id="m-sticks">–</td></tr>
+    <tr><td>topple</td>      <td class="v" id="m-topple">–</td></tr>
+    <tr><td>stress</td>      <td class="v" id="m-stress">–</td></tr>
+    <tr><td>buckling</td>    <td class="v" id="m-buckling">–</td></tr>
+    <tr><td>deflection</td>  <td class="v" id="m-deflection">–</td></tr>
+    <tr id="score-row"><td>score</td><td class="v" id="m-score">–</td></tr>
+  </table>
+  <div id="failbanner"></div>
+</div>
+
+<div id="legend" class="panel">
+  compression <span class="bar"></span> tension
+  <span id="legend-scale"></span>
+</div>
+
+<div id="controls" class="panel">
+  <button id="btn-prev" title="previous step">&#8249;</button>
+  <button id="btn-play" title="play / pause">&#9654;</button>
+  <button id="btn-next" title="next step">&#8250;</button>
+  <input type="range" id="step-slider" min="0" max="0" value="0" step="1">
+  <span id="step-label">step –/–</span>
+  <button id="btn-color" title="toggle stress colors">stress</button>
+</div>
+
+<div id="loader" class="panel">
+  <label for="file-input">load episode JSON…</label>
+  <input type="file" id="file-input" accept=".json,application/json">
+  <span id="file-name">demo_episode.json</span>
+</div>
+
+<div id="training" class="panel">
+  <h2>training run</h2>
+  <select id="run-select"></select>
+  <div id="gen-row">
+    <input type="range" id="gen-slider" min="0" max="0" value="0" step="1">
+    <span id="gen-label">gen –</span>
+  </div>
+  <div id="seed-row">seed <select id="seed-select"></select></div>
+  <div id="archive-grid"></div>
+  <div id="axes"><span>span &#8594;</span><span>height &#8593; · click a cell to replay</span></div>
+  <div id="train-info"></div>
+</div>
+
+<script type="module" src="viewer.js"></script>
+</body>
+</html>

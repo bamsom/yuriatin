@@ -31,3 +31,7 @@ site/.astro/
 *.log
 .env
 .env.*
+
+# --- lab experiments (not part of the publishing pipeline) ---
+# episode outputs are regenerable; one demo episode is committed in viewer/
+lab/birdnest/runs/
